@@ -1,0 +1,26 @@
+---
+title: "Qualitative Analisys - BRASFI"
+author: "Annie Cavalcante"
+format: html
+editor: visual
+jupyter: python3
+---
+
+## Preparing analysis
+
+```{r, packages}
+#|echo: TRUE
+#|message: FALSE
+library(reticulate)
+py_config()
+
+```
+
+You can add options to executable code like this
+
+```{python}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
