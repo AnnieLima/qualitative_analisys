@@ -4,9 +4,11 @@ author: "Annie Cavalcante"
 format: html
 editor: visual
 jupyter: python3
+editor_options: 
+  chunk_output_type: console
 ---
 
-## Preparing analysis
+## Preparing for analysis
 
 ```{r, packages}
 #|echo: TRUE
@@ -14,6 +16,83 @@ jupyter: python3
 library(reticulate)
 py_config()
 
+```
+
+```{r, pandas}
+#|echo: TRUE
+#|message: FALSE
+# Install pandas, matplotlib, and wordcloud
+py_require(c("pandas", "matplotlib", "wordcloud"))
+py_require("nltk")
+py_require("openpyxl")
+
+
+```
+
+## Qualitative analysis
+
+```{python, packages}
+#|echo: TRUE
+#|message: FALSE
+import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import os
+```
+
+The file contains responses to a questionnaire administered via Google Forms. The spreadsheet was reviewed, and multiple-choice and open-ended questions were identified. The main questions identified were:
+
+-   "O que normalmente te impede de participar das atividades da BRASFI?"
+
+-   "O que mais te motivaria a participar ativamente da BRASFI?"
+
+-    "O que podemos ajustar para facilitar sua participação e engajamento?"
+
+-   "Qual tema ou formato de atividade te interessaria mais neste momento?"
+
+-    "Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?"
+
+-    "De que forma você poderia ajudar a potencializar a BRASFI?"
+
+    After identifying the main questions, it was necessary to remove columns that might contain sensitive data.
+
+```{python, file}
+#|echo: TRUE
+#|message: FALSE
+
+# Load the Excel file
+file_path = "/cloud/project/survey_data.xlsx"
+df_raw = pd.read_excel(file_path, sheet_name="Respostas ao formulário 1")  
+
+# Remove the last column
+df = df_raw.iloc[:, :-1]
+
+# Display the modified DataFrame
+print(df)
+
+```
+
+After inspecting the questions and answers provided, we separate them in two categories:
+
+-   Open questions: These are questions that require an answer to be entered.
+
+-   Closed questions: Questions that provide a list of options to choose from, or that require you to select all applicable options.
+
+```{python, closed}
+#|echo: TRUE
+#|message: FALSE
+
+# Select the 'closed questions' (categorical or multiple choices answers)
+colunas_fechadas = [
+    "Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI?",
+    "Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?",
+    "Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)? (Você pode selecionar mais de uma opção)",
+    "O formato atual de dias e horários (preferencialmente às quartas, 19h) são acessíveis para sua rotina?",
+    "Qual frequência você considera ideal realizar os encontros?",
+    "Caso não conseguisse participar da palestra ao vivo, você assistiria à gravação?",
+    "Como você avalia os temas discutidos até agora?",
+    "Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI?"
+]
 ```
 
 You can add options to executable code like this
