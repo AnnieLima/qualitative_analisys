@@ -17,10 +17,7 @@ website:
       - href: index.qmd
         text: Home
       - href: about.qmd
-        text: About
-format:
-  html:
-    theme: cosmo
+theme: cosmo
 ---
 
 ## Preparing for analysis
@@ -157,3 +154,50 @@ print(f"Plots have been exported to the '{output_dir}' directory.")
 
 These plots summarize the responses to each closed question, making
 it easier to visualize trends and preferences among participants.
+
+```{python, wordcloud}
+#|echo: TRUE
+#|message: FALSE
+
+from wordcloud import WordCloud, STOPWORDS
+
+# Correct column names with trailing spaces
+colunas_abertas = [
+    "O que normalmente te impede de participar das atividades da BRASFI?",
+    "O que mais te motivaria a participar ativamente da BRASFI?",
+    "O que podemos ajustar para facilitar sua participação e engajamento?  (Você pode selecionar mais de uma opção)",
+    "Qual tema ou formato de atividade te interessaria mais neste momento?",
+    "Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?",
+    "De que forma você poderia ajudar a potencializar a BRASFI?  (Você pode selecionar mais de uma opção)"
+]
+
+# Expand stopwords list
+stopwords = set(STOPWORDS)
+stopwords.update([
+  "a","à", "acho", "acredito", "ajudar", "algo", "algum", "alguns", "além", "ao", "aos", "após", "as", "atividade", "até", "bem", "BRASFI", "cada", "como", "consigo", "COP30", "da", "das", "de", "do", "dos", "e", "em", "entanto", "entre", "essa", "essas", "esse", "esses", "esta", "estao", "estas", "estou", "estão", "etc", "eu", "fazendo", "GT", "ir", "isso", "isto", "já", "maior", "mais", "mas", "meio", "menor", "menos", "meu", "mim", "minha", "minhas", "momento", "muito", "na", "nada", "nas", "neste", "no", "no entanto", "nos", "nossa", "nossas", "não", "o", "os", "ou", "para", "participar", "pela", "pelas", "pelos", "poderia", "pois", "por", "porque", "porém", "posso", "pra", "pouco", "Vi",  "quais", "que", "quem", "queria", "S2", "se","ser", "sei", "seria", "sinto", "sobre", "são", "só", "tem", "tenho", "ter", "todos", "tudo", "um", "uma", "umas", "uns", "usar", "vezes", "vi", "vir", "vivi", "vocês", "é", "uso", "faz"
+])
+
+# Create output directory
+output_dir = "wordcloud"
+os.makedirs(output_dir, exist_ok=True)
+
+# Generate and save word clouds with numeric filenames
+for idx, col in enumerate(colunas_abertas, start=1):
+    if col in df.columns:
+        texto = " ".join(str(v) for v in df[col].dropna().tolist())
+        wc = WordCloud(width=800, height=400, background_color="white",
+                       stopwords=stopwords, collocations=False).generate(texto)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wc, interpolation="bilinear")
+        plt.axis("off")
+        plt.title(col.strip(), fontsize=12)
+        plt.tight_layout()
+        filename = os.path.join(output_dir, f"{idx}.png")
+        plt.savefig(filename, bbox_inches="tight")
+        plt.close()
+
+print(f"Word clouds saved in the '{output_dir}' directory with numeric filenames.")
+
+
+
+```
