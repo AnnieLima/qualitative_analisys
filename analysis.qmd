@@ -8,6 +8,8 @@ editor_options:
   chunk_output_type: console
 project:
   type: website
+  output-dir: docs
+
 website:
   title: "My Analysis"
   navbar:
