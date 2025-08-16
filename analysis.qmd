@@ -6,6 +6,19 @@ editor: visual
 jupyter: python3
 editor_options: 
   chunk_output_type: console
+project:
+  type: website
+website:
+  title: "My Analysis"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: about.qmd
+        text: About
+format:
+  html:
+    theme: cosmo
 ---
 
 ## Preparing for analysis
