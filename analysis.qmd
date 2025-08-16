@@ -1,5 +1,5 @@
 ---
-title: "Qualitative Analisys - BRASFI"
+title: "Qualitative Analysis - BRASFI"
 author: "Annie Cavalcante"
 format: html
 editor: visual
@@ -40,7 +40,7 @@ from wordcloud import WordCloud
 import os
 ```
 
-The file contains responses to a questionnaire administered via Google Forms. The spreadsheet was reviewed, and multiple-choice and open-ended questions were identified. The main questions identified were:
+The file contains responses to a questionnaire administered via Google Forms. The spreadsheet was reviewed, and multiple-choice and open-ended questions were identified. The main questions identified are:
 
 -   "O que normalmente te impede de participar das atividades da BRASFI?"
 
@@ -72,11 +72,11 @@ print(df)
 
 ```
 
-After inspecting the questions and answers provided, we separate them in two categories:
+With the data loaded and sensitive columns removed, we next categorize the questions by type: multiple-choice and open-ended questions.
 
--   Open questions: These are questions that require an answer to be entered.
+-   Open-ended questions: These are questions that require an answer to be entered.
 
--   Closed questions: Questions that provide a list of options to choose from, or that require you to select all applicable options.
+-   Multiple-choice questions: Questions that provide a list of options to choose from, or that require you to select all applicable options.
 
 ```{python, closed}
 #|echo: TRUE
@@ -140,11 +140,5 @@ print(f"Plots have been exported to the '{output_dir}' directory.")
 
 ```
 
-You can add options to executable code like this
-
-```{python}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
+These plots summarize the responses to each closed question, making
+it easier to visualize trends and preferences among participants.
