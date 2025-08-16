@@ -95,6 +95,51 @@ colunas_fechadas = [
 ]
 ```
 
+The first analysis will provide information about the "closed questions." The aim is to understand which activities members frequently participate in, if they participate in other activities, and if the format of the activities (e.g., lectures) meets their needs.
+
+```{python, graphs_closed}
+#|echo: TRUE
+#|message: FALSE
+
+# Create bar graphs for each questions
+avocado_green = "#568203"  # avocado green hex code
+
+# Create output directory for plots
+output_dir = "exported_plots"
+os.makedirs(output_dir, exist_ok=True)
+
+# Loop through each column (question)
+for col in colunas_fechadas:
+    # Count responses and sort for better visual order
+    value_counts = df[col].value_counts().sort_values()
+
+    # Create numeric labels and mapping
+    label_mapping = {i + 1: label for i, label in enumerate(value_counts.index)}
+    numeric_labels = {i + 1: count for i, count in enumerate(value_counts.values)}
+
+    # Plot
+    plt.figure(figsize=(8, 6))
+    plt.barh(list(numeric_labels.keys()), list(numeric_labels.values()), color=avocado_green)
+    plt.title(f"Respostas para: {col}", fontsize=12)
+    plt.xlabel("Número de respostas", fontsize=10)
+    plt.ylabel("Categorias (numeradas)", fontsize=10)
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.yticks(list(numeric_labels.keys()))  # Ensure only whole number labels
+    plt.tight_layout()
+
+    # Add legend below the plot
+    legend_text = "\n".join([f"{num}: {text}" for num, text in label_mapping.items()])
+    plt.figtext(0.5, -0.25, f"Legenda:\n{legend_text}", wrap=True, horizontalalignment='center', fontsize=9)
+
+    # Save plot as image
+    filename = f"{output_dir}/{col.replace(' ', '_')}.png"
+    plt.savefig(filename, bbox_inches='tight')
+    plt.close()
+
+print(f"Plots have been exported to the '{output_dir}' directory.")
+
+```
+
 You can add options to executable code like this
 
 ```{python}
