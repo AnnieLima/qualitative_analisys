@@ -24,11 +24,6 @@ Este relatório apresenta uma análise qualitativa das respostas coletadas na pe
 
 ## Perguntas Fechadas
 
-### Carimbo de data/hora
-![](charts/Carimbo de data_hora_bar.png)
-
-![](charts/Carimbo de data_hora_pie.png)
-
 ### Qual é a sua motivação para participar da BRASFI?  (Você pode selecionar mais de uma opção)
 ![](charts/Qual é a sua motivação para participar da BRASFI_  (Você pode selecionar mais de uma opção)_bar.png)
 
