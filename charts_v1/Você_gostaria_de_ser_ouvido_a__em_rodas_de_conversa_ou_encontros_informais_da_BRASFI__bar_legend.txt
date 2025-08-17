@@ -1,0 +1,5 @@
+Legend for: Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI?
+
+1: Talvez
+2: Sim
+3: Não

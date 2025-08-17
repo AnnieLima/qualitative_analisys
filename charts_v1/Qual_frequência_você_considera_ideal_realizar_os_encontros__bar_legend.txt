@@ -1,0 +1,5 @@
+Legend for: Qual frequência você considera ideal realizar os encontros?
+
+1: Quinzenal
+2: Mensal
+3: Semanal

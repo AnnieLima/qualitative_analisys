@@ -1,0 +1,9 @@
+Legend for: O que normalmente te impede de participar das atividades da BRASFI?  
+
+1: Conflito de horário
+2: Cansaço ou sobrecarga
+3: Outras prioridades no momento
+4: Não entendo como posso contribuir
+5: O assunto não me desperta interesse 
+6: Sinto que executo atividades abaixo das minhas competências.
+7: sinto que falta a visualização da meta, do porque  e como nossas pequenas ações contribui a alcançar essa meta

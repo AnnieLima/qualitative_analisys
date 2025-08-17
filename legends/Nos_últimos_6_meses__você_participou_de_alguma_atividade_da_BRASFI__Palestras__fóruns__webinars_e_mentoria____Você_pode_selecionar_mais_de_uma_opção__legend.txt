@@ -1,0 +1,6 @@
+Legenda — Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)? (Você pode selecionar mais de uma opção)
+
+1: Palestras e webinars da Trilha COP30
+2: Eventos (BRASFIDAY e MOVE_IMPACT)
+3: Mentoria
+4: Não participei apesar de ter conhecimento sobre as atividades

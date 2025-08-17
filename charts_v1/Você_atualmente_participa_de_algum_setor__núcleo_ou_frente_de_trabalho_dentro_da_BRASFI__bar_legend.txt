@@ -1,0 +1,5 @@
+Legend for: Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI?
+
+1: Sim
+2: Não
+3: Já fiz parte, mas atualmente não estou envolvido
