@@ -1,0 +1,109 @@
+---
+title: "Análise Qualitativa - Trilha COP30 (BRASFI)"
+format: html
+jupyter: python3
+project:
+  type: website
+  output-dir: docs
+website:
+  title: "BRASFI - COP30"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Início
+      - href: sobre.qmd
+        text: Sobre
+resources:
+  - charts
+  - wordclouds
+---
+
+## Introdução
+
+Este relatório apresenta uma análise qualitativa das respostas coletadas na pesquisa de satisfação sobre as palestras da Trilha COP30 promovidas pela BRASFI. A análise inclui visualizações para perguntas abertas e fechadas, com o objetivo de identificar padrões, motivações e oportunidades de melhoria.
+
+## Perguntas Fechadas
+
+### Carimbo de data/hora
+![](charts/Carimbo de data_hora_bar.png)
+
+![](charts/Carimbo de data_hora_pie.png)
+
+### Qual é a sua motivação para participar da BRASFI?  (Você pode selecionar mais de uma opção)
+![](charts/Qual é a sua motivação para participar da BRASFI_  (Você pode selecionar mais de uma opção)_bar.png)
+
+![](charts/Qual é a sua motivação para participar da BRASFI_  (Você pode selecionar mais de uma opção)_pie.png)
+
+### Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI?
+![](charts/Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI__bar.png)
+
+![](charts/Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI__pie.png)
+
+### Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?
+![](charts/Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)__bar.png)
+
+![](charts/Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)__pie.png)
+
+### Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)? (Você pode selecionar mais de uma opção)
+![](charts/Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)_ (Você pode selecionar mais de uma opção)_bar.png)
+
+![](charts/Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)_ (Você pode selecionar mais de uma opção)_pie.png)
+
+### O que normalmente te impede de participar das atividades da BRASFI?  
+![](charts/O que normalmente te impede de participar das atividades da BRASFI_  _bar.png)
+
+![](charts/O que normalmente te impede de participar das atividades da BRASFI_  _pie.png)
+
+### O formato atual de dias e horários (preferencialmente às quartas, 19h) são acessíveis para sua rotina?
+![](charts/O formato atual de dias e horários (preferencialmente às quartas, 19h) são acessíveis para sua rotina__bar.png)
+
+![](charts/O formato atual de dias e horários (preferencialmente às quartas, 19h) são acessíveis para sua rotina__pie.png)
+
+### Qual frequência você considera ideal realizar os encontros?
+![](charts/Qual frequência você considera ideal realizar os encontros__bar.png)
+
+![](charts/Qual frequência você considera ideal realizar os encontros__pie.png)
+
+### Caso não conseguisse participar da palestra ao vivo, você assistiria à gravação?
+![](charts/Caso não conseguisse participar da palestra ao vivo, você assistiria à gravação__bar.png)
+
+![](charts/Caso não conseguisse participar da palestra ao vivo, você assistiria à gravação__pie.png)
+
+### Como você avalia os temas discutidos até agora?
+![](charts/Como você avalia os temas discutidos até agora__bar.png)
+
+![](charts/Como você avalia os temas discutidos até agora__pie.png)
+
+### Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI?
+![](charts/Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI__bar.png)
+
+![](charts/Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI__pie.png)
+
+## Perguntas Abertas
+
+### O que mais te motivaria a participar ativamente da BRASFI? 
+![](wordclouds/O que mais te motivaria a participar ativamente da BRASFI_ _wordcloud.png)
+
+### O que podemos ajustar para facilitar sua participação e engajamento?  (Você pode selecionar mais de uma opção)
+![](wordclouds/O que podemos ajustar para facilitar sua participação e engajamento_  (Você pode selecionar mais de uma opção)_wordcloud.png)
+
+### Em quais palestras da Trilha COP30 você participou?  (Você pode selecionar mais de uma opção)
+![](wordclouds/Em quais palestras da Trilha COP30 você participou_  (Você pode selecionar mais de uma opção)_wordcloud.png)
+
+### Qual dessas motivações te faz participar das palestras da Trilha COP30?  (Você pode selecionar mais de uma opção)
+![](wordclouds/Qual dessas motivações te faz participar das palestras da Trilha COP30_  (Você pode selecionar mais de uma opção)_wordcloud.png)
+
+### Qual tema ou formato de atividade te interessaria mais neste momento?
+![](wordclouds/Qual tema ou formato de atividade te interessaria mais neste momento__wordcloud.png)
+
+### Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?
+![](wordclouds/Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria__wordcloud.png)
+
+### De que forma você poderia ajudar a potencializar a BRASFI?  (Você pode selecionar mais de uma opção)
+![](wordclouds/De que forma você poderia ajudar a potencializar a BRASFI_  (Você pode selecionar mais de uma opção)_wordcloud.png)
+
+### Você gostaria de cocriar ideias com a gente? Se sim, deixe seu nome e e-mail.
+![](wordclouds/Você gostaria de cocriar ideias com a gente_ Se sim, deixe seu nome e e-mail._wordcloud.png)
+
+## Conclusão
+A análise revela insights importantes sobre os interesses, barreiras e sugestões dos participantes da Trilha COP30. As visualizações ajudam a compreender melhor os pontos de engajamento e as oportunidades de melhoria para futuras ações da BRASFI.

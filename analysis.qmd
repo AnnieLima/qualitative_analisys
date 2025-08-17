@@ -58,15 +58,17 @@ The file contains responses to a questionnaire administered via Google Forms. Th
 
 -   "O que mais te motivaria a participar ativamente da BRASFI?"
 
--    "O que podemos ajustar para facilitar sua participação e engajamento?"
+-   "O que podemos ajustar para facilitar sua participação e engajamento?"
 
 -   "Qual tema ou formato de atividade te interessaria mais neste momento?"
 
--    "Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?"
+-   "Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?"
 
--    "De que forma você poderia ajudar a potencializar a BRASFI?"
+-   "De que forma você poderia ajudar a potencializar a BRASFI?"
 
-    After identifying the main questions, it was necessary to remove columns that might contain sensitive data.
+```         
+After identifying the main questions, it was necessary to remove columns that might contain sensitive data.
+```
 
 ```{python, file}
 #|echo: TRUE
@@ -152,8 +154,7 @@ print(f"Plots have been exported to the '{output_dir}' directory.")
 
 ```
 
-These plots summarize the responses to each closed question, making
-it easier to visualize trends and preferences among participants.
+These plots summarize the responses to each closed question, making it easier to visualize trends and preferences among participants.
 
 ```{python, wordcloud}
 #|echo: TRUE
