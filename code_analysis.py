@@ -292,7 +292,7 @@ def wordcloud_pt(text_series: pd.Series, title: str, filename_prefix: str,
 
 # ---------- Pipeline ----------
 OPEN_TEXT_HINTS = {
-    "O que normalmente te impede de participar das atividades da BRASFI?",
+    # (REMOVIDA) "O que normalmente te impede de participar das atividades da BRASFI?",
     "O que mais te motivaria a participar ativamente da BRASFI?",
     "O que podemos ajustar para facilitar sua participação e engajamento? (Você pode selecionar mais de uma opção)",
     "Qual tema ou formato de atividade te interessaria mais neste momento?",
@@ -300,16 +300,25 @@ OPEN_TEXT_HINTS = {
     "De que forma você poderia ajudar a potencializar a BRASFI? (Você pode selecionar mais de uma opção)"
 }
 
+# Forçar tratamento categórico (pizza/barras) para perguntas específicas
+FORCE_CATEGORICAL = {
+    "O que normalmente te impede de participar das atividades da BRASFI?",
+    "O que mais te motivaria a participar ativamente da BRASFI?"
+}
+
 for col in df.columns:
     series = df[col]
     col_clean = clean_col(col)
     fname = sanitize_filename(col_clean)
 
-    # Explode se for múltipla seleção
+   # Explode se for múltipla seleção
     s = expand_multiselect(series) if is_multiselect(series) else series
 
-    # Classificar a pergunta
-    qtype = classify_question(s, open_text_hints=OPEN_TEXT_HINTS)
+    # ---- OVERRIDE DE TIPO ----
+    if any(col_clean.startswith(prefix) for prefix in FORCE_CATEGORICAL):
+        qtype = "categorical"
+    else:
+        qtype = classify_question(s, open_text_hints=OPEN_TEXT_HINTS)
 
     if qtype == "open":
         # Wordcloud
