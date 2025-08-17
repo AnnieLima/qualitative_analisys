@@ -22,23 +22,28 @@ theme: cosmo
 
 ## Preparing for analysis
 
-```{r, packages}
-#|echo: TRUE
-#|message: FALSE
+```{r packages}
+#| message: false
+#| warning: false
+#| paged-print: false
+
 library(reticulate)
+reticulate::py_install("seaborn")
+reticulate::py_install("Unidecode")
 py_config()
 
 ```
 
 ```{r, pandas}
-#|echo: TRUE
+#|echo: FALSE
 #|message: FALSE
+
 # Install pandas, matplotlib, and wordcloud
 py_require(c("pandas", "matplotlib", "wordcloud"))
 py_require("nltk")
 py_require("openpyxl")
-
-
+py_require("seaborn")
+py_require("Unidecode")
 ```
 
 ## Qualitative analysis
@@ -46,10 +51,14 @@ py_require("openpyxl")
 ```{python, packages}
 #|echo: TRUE
 #|message: FALSE
+
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from wordcloud import WordCloud
 import os
+import re
+
 ```
 
 The file contains responses to a questionnaire administered via Google Forms. The spreadsheet was reviewed, and multiple-choice and open-ended questions were identified. The main questions identified are:
@@ -66,9 +75,7 @@ The file contains responses to a questionnaire administered via Google Forms. Th
 
 -   "De que forma você poderia ajudar a potencializar a BRASFI?"
 
-```         
 After identifying the main questions, it was necessary to remove columns that might contain sensitive data.
-```
 
 ```{python, file}
 #|echo: TRUE
@@ -79,10 +86,30 @@ file_path = "/cloud/project/survey_data.xlsx"
 df_raw = pd.read_excel(file_path, sheet_name="Respostas ao formulário 1")  
 
 # Remove the last column
-df = df_raw.iloc[:, :-1]
+df = df_raw.iloc[:, 1:-1].copy()
 
 # Display the modified DataFrame
-print(df)
+df.head()
+
+
+# --- Higienizar nomes das colunas (remover espaços duplicados, trims) ---
+def clean_col(c):
+    c = re.sub(r"\s+", " ", str(c)).strip()
+    return c
+
+df.columns = [clean_col(c) for c in df.columns]
+
+
+# --- Conferência rápida ---
+print("Total de colunas (após remoção de 1ª e última):", df.shape[1])
+print("Primeiras 5 colunas:")
+print(df.columns[:5].tolist())
+
+
+# --- Pastas de saída ---
+os.makedirs("charts", exist_ok=True)
+os.makedirs("wordclouds", exist_ok=True)
+
 
 ```
 
@@ -92,65 +119,335 @@ With the data loaded and sensitive columns removed, we next categorize the quest
 
 -   Multiple-choice questions: Questions that provide a list of options to choose from, or that require you to select all applicable options.
 
-```{python, closed}
+The first analysis will provide information about the "closed questions." The aim is to understand which activities members frequently participate in, whether they participate in other activities and whether the format of the activities (e.g. lectures) meets their needs.
+
+## Functions to generate the graphs
+
+First, set out the necessary steps before creating the graphs. This includes defining colour palettes; in this case, I chose 'avocado green' because it resembles Brasfi's colour identity. Then create the folder where the graphs will be saved.
+
+To improve the time necessary to create all the grpahs necessary, a set of functions were created to generate different types of graphs: pie charts, horizontal bar charts, and wordcloud chart.
+
+```{python, functions}
 #|echo: TRUE
 #|message: FALSE
+#|warning: FALSE
 
-# Select the 'closed questions' (categorical or multiple choices answers)
-colunas_fechadas = [
-    "Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI?",
-    "Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?",
-    "Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)? (Você pode selecionar mais de uma opção)",
-    "O formato atual de dias e horários (preferencialmente às quartas, 19h) são acessíveis para sua rotina?",
-    "Qual frequência você considera ideal realizar os encontros?",
-    "Caso não conseguisse participar da palestra ao vivo, você assistiria à gravação?",
-    "Como você avalia os temas discutidos até agora?",
-    "Você gostaria de ser ouvido(a) em rodas de conversa ou encontros informais da BRASFI?"
-]
-```
 
-The first analysis will provide information about the "closed questions." The aim is to understand which activities members frequently participate in, if they participate in other activities, and if the format of the activities (e.g., lectures) meets their needs.
+# ===============================
+# Imports e configurações globais
+# ===============================
+import os, re, math, textwrap
+import pandas as pd
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud, STOPWORDS
+from unidecode import unidecode
 
-```{python, graphs_closed}
-#|echo: TRUE
-#|message: FALSE
+mpl.rcParams["font.family"] = "DejaVu Sans"  # bom suporte a acentos
+plt.style.use("seaborn-v0_8")                # estilo visual
 
-# Create bar graphs for each questions
-avocado_green = "#568203"  # avocado green hex code
+# Paleta "avocado" + fallback para escalas longas
+AVOCADO = ["#568203", "#6B8E23", "#A9BA9D", "#B2D3C2", "#D0F0C0"]
+def get_palette(n):
+    if n <= len(AVOCADO):
+        return AVOCADO[:n]
+    # Gera tons de verde se precisar de mais cores
+    return sns.color_palette("Greens", n)
 
-# Create output directory for plots
-output_dir = "exported_plots"
-os.makedirs(output_dir, exist_ok=True)
 
-# Loop through each column (question)
-for col in colunas_fechadas:
-    # Count responses and sort for better visual order
-    value_counts = df[col].value_counts().sort_values()
+# Pastas de saída
+os.makedirs("charts", exist_ok=True)
+os.makedirs("wordclouds", exist_ok=True)
+os.makedirs("legends", exist_ok=True)
 
-    # Create numeric labels and mapping
-    label_mapping = {i + 1: label for i, label in enumerate(value_counts.index)}
-    numeric_labels = {i + 1: count for i, count in enumerate(value_counts.values)}
+# =================
+# Funções utilitárias
+# =================
+def sanitize_filename(name: str) -> str:
+    return "".join(c if c.isalnum() or c in "._-" else "_" for c in str(name))
+
+def is_multiselect(series: pd.Series) -> bool:
+    # Se detectar separadores comuns (vírgula ou ponto-e-vírgula) em uma parcela significativa das linhas
+    s = series.dropna().astype(str)
+    if s.empty:
+        return False
+    frac = (s.str.contains(r",|;")).mean()
+    return frac >= 0.15  # ajustável
+
+def expand_multiselect(series: pd.Series, pattern=r"\s*,\s*|\s*;\s*") -> pd.Series:
+    s = series.dropna().astype(str)
+    # separa e explode
+    s = s.str.split(pattern).explode().str.strip()
+    # remove vazios
+    s = s[s != ""]
+    return s
+
+def classify_question(series: pd.Series, open_text_hints=None):
+    """Heurística: 'open' (texto livre), 'long_categorical' (poucas categorias mas rótulos longos), 'categorical'."""
+    s = series.dropna().astype(str)
+    if open_text_hints and series.name in open_text_hints:
+        return "open"
+    n_unique = s.nunique()
+    avg_len = s.str.len().mean() if not s.empty else 0
+    unique_ratio = n_unique / max(len(s), 1)
+
+    # Muito variada -> aberto
+    if n_unique >= 30 or unique_ratio > 0.8:
+        return "open"
+    # Poucas categorias, mas rótulos longos -> barras com código numérico
+    if n_unique <= 30 and (avg_len >= 30):
+        return "long_categorical"
+    return "categorical"
+
+# =============================================
+# Barras horizontais com codificação numérica
+# =============================================
+def barh_numeric(series: pd.Series, title: str, filename_prefix: str,
+                 order="frequency"):
+    """
+    - Converte categorias textuais em códigos 1..k.
+    - Ordena por frequência (desc) por padrão.
+    - Salva: gráfico .png em charts/, legenda .txt e .csv em legends/, e uma imagem de legenda .png.
+    """
+    s = series.dropna().astype(str)
+    counts = s.value_counts(dropna=False)
+
+    if order == "frequency":
+        labels = list(counts.index)  # já vem ordenado por freq desc
+    else:
+        labels = sorted(counts.index, key=lambda x: str(x))
+
+    codes = list(range(1, len(labels) + 1))
+    label_map = {lab: code for lab, code in zip(labels, codes)}
+
+    # Dados no eixo: códigos com contagens (ordenados por freq desc)
+    plot_df = pd.DataFrame({
+        "code": [label_map[lab] for lab in labels],
+        "label": labels,
+        "count": [counts[lab] for lab in labels]
+    }).sort_values("count", ascending=True)  # ascending p/ barra horizontal ascendente
 
     # Plot
-    plt.figure(figsize=(8, 6))
-    plt.barh(list(numeric_labels.keys()), list(numeric_labels.values()), color=avocado_green)
-    plt.title(f"Respostas para: {col}", fontsize=12)
-    plt.xlabel("Número de respostas", fontsize=10)
-    plt.ylabel("Categorias (numeradas)", fontsize=10)
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-    plt.yticks(list(numeric_labels.keys()))  # Ensure only whole number labels
+    plt.figure(figsize=(10, max(4, 0.4 * len(plot_df))))
+    palette = get_palette(len(plot_df))
+    bars = plt.barh(plot_df["code"], plot_df["count"], color=palette)
+    plt.yticks(plot_df["code"], plot_df["code"])  # mostra só os códigos
+    plt.xlabel("Frequência")
+    plt.ylabel("Código da categoria")
+    plt.title(title, loc="left", wrap=True)
+
+    # Anota a contagem na extremidade das barras
+    for bar, val in zip(bars, plot_df["count"]):
+        plt.text(bar.get_width() + max(plot_df["count"])*0.01, bar.get_y() + bar.get_height()/2,
+                 f"{val}", va="center", fontsize=9)
+
     plt.tight_layout()
-
-    # Add legend below the plot
-    legend_text = "\n".join([f"{num}: {text}" for num, text in label_mapping.items()])
-    plt.figtext(0.5, -0.25, f"Legenda:\n{legend_text}", wrap=True, horizontalalignment='center', fontsize=9)
-
-    # Save plot as image
-    filename = f"{output_dir}/{col.replace(' ', '_')}.png"
-    plt.savefig(filename, bbox_inches='tight')
+    out_chart = os.path.join("charts", f"{filename_prefix}_barh_numeric.png")
+    plt.savefig(out_chart, dpi=200, bbox_inches="tight")
     plt.close()
 
-print(f"Plots have been exported to the '{output_dir}' directory.")
+    # Legendas: TXT e CSV
+    legend_txt = os.path.join("legends", f"{filename_prefix}_legend.txt")
+    legend_csv = os.path.join("legends", f"{filename_prefix}_legend.csv")
+    with open(legend_txt, "w", encoding="utf-8") as f:
+        f.write(f"Legenda — {title}\n\n")
+        for lab in labels:
+            f.write(f"{label_map[lab]}: {lab}\n")
+    pd.DataFrame({"code": codes, "label": labels}).to_csv(legend_csv, index=False, encoding="utf-8")
+
+    # Legenda como imagem (tabela)
+    fig, ax = plt.subplots(figsize=(10, max(1.2, 0.35 * len(labels))))
+    ax.axis("off")
+    table_data = [[label_map[lab], lab] for lab in labels]
+    table = ax.table(cellText=table_data, colLabels=["Código", "Categoria"], loc="center", cellLoc="left", colLoc="left")
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 1.2)
+    legend_img = os.path.join("legends", f"{filename_prefix}_legend.png")
+    plt.title(f"Legenda — {title}", loc="left")
+    plt.savefig(legend_img, dpi=200, bbox_inches="tight")
+    plt.close()
+
+    return {"chart": out_chart, "legend_txt": legend_txt, "legend_csv": legend_csv, "legend_img": legend_img}
+
+# ==========================
+# Gráfico de Pizza (% + n)
+# ==========================
+def pie_with_counts(series: pd.Series, title: str, filename_prefix: str,
+                    min_pct_other: float = 0.0):
+    """
+    - Fatias com 'xx.x% (n=k)'.
+    - Legenda externa.
+    - min_pct_other: agrega categorias < esse percentual em 'Outros' (0.03 -> 3%).
+    """
+    s = series.dropna().astype(str)
+    counts = s.value_counts()
+    total = int(counts.sum())
+    if total == 0:
+        return None
+
+    # Agregar 'Outros' se solicitado
+    if min_pct_other and 0 < min_pct_other < 1:
+        pct = counts / total
+        small = pct[pct < min_pct_other]
+        if not small.empty:
+            counts = counts[pct >= min_pct_other]
+            counts.loc["Outros"] = small.sum()
+
+    labels = list(counts.index)
+    values = list(counts.values)
+    palette = get_palette(len(values))
+
+    def autopct_fmt(pct):
+        n = int(round(pct/100.0 * total))
+        return f"{pct:.1f}% (n={n})" if n > 0 else ""
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    wedges, texts, autotexts = ax.pie(values,
+                                      startangle=140,
+                                      colors=palette,
+                                      autopct=autopct_fmt,
+                                      wedgeprops=dict(edgecolor="white"))
+    ax.set_title(title, loc="left")
+
+    # Legenda à direita com rótulos + n
+    legend_labels = [f"{lab} (n={val})" for lab, val in zip(labels, values)]
+    ax.legend(wedges, legend_labels, title="Categorias", loc="center left", bbox_to_anchor=(1, 0.5))
+    ax.axis("equal")
+
+    plt.tight_layout()
+    out_path = os.path.join("charts", f"{filename_prefix}_pie.png")
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close()
+    return out_path
+
+# ==================================
+# Wordcloud (Português + custom list)
+# ==================================
+def build_pt_stopwords(extra=None):
+    # Base WordCloud + tentativa de NLTK (portuguese). Se NLTK indisponível, segue sem travar.
+    sw = set(STOPWORDS)
+    try:
+        import nltk
+        try:
+            nltk.data.find("corpora/stopwords")
+        except LookupError:
+            # Pode falhar no ambiente offline; ignore se não conseguir baixar
+            try:
+                nltk.download("stopwords", quiet=True)
+            except Exception:
+                pass
+        from nltk.corpus import stopwords as nltk_sw
+        sw.update(nltk_sw.words("portuguese"))
+    except Exception:
+        pass
+
+    # Sua lista customizada (derivada do analysis_v1)
+    custom = {
+        "a","à","acho","acredito","ajudar","algo","algum","alguns","além","ao","aos","após","as", "atuos", "dia", "logo", 
+        "atividade","até","bem","brasfi","cada","como","consigo","cop30","da","das","de","do","dos",
+        "e","em","entanto","entre","essa","essas","esse","esses","esta","estao","estas","estou","estão",
+        "etc","eu","fazendo","gt","gts", "ir","isso","isto","já","maior","mais","mas","meio","menor","menos",
+        "meu","mim","minha","minhas","momento","muito","na","nada","nas","neste","no","no entanto","nos",
+        "nossa","nossas","não","o","os","ou","para","participar","pela","pelas","pelos","poderia","pois",
+        "por","porque","porém","posso","pra","pouco","quais","que","quem","queria","s2","se","ser","sei",
+        "seria","sinto","sobre","são","só","tem","tenho","ter","todo","todos","tudo","um","uma","umas","uns",
+        "usar","vezes","vi","vir","vivi","vocês","é","uso","faz", "paulo", "m", "gral", "niveis", "fiquem", "apenas", "antigos", "consegui", "sido", "hoje", "permitam", "conseguimos", "fizeram", "sugiro", "p", "quero", "fazer", "propria", "participei", "ainda", "irei" "fará", "gerar", "gera", "próprio", "própria", "irão", "marcas"
+    }
+    sw.update(custom)
+
+    # Adicionar variações sem acento para capturar ambas as formas
+    sw_noacc = {unidecode(x) for x in sw}
+    sw.update(sw_noacc)
+
+    if extra:
+        sw.update({w.lower().strip() for w in extra})
+        sw.update({unidecode(w.lower().strip()) for w in extra})
+    return sw
+
+def wordcloud_pt(text_series: pd.Series, title: str, filename_prefix: str,
+                 extra_stopwords=None, width=1000, height=500):
+    s = text_series.dropna().astype(str)
+    if s.empty:
+        return None
+
+    # Limpeza leve e normalização
+    text = " ".join(s.tolist())
+    # Mantém acentos no visual; remove apenas URLs e excesso de espaços
+    text = re.sub(r"http\S+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip().lower()
+
+    sw = build_pt_stopwords(extra_stopwords)
+
+    wc = WordCloud(width=width, height=height, background_color="white",
+                   stopwords=sw, collocations=False, prefer_horizontal=0.95,
+                   colormap="summer").generate(text)
+
+    plt.figure(figsize=(12, 6))
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.title(title, loc="left")
+    out_path = os.path.join("wordclouds", f"{filename_prefix}_wordcloud.png")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close()
+    return out_path
+
+# ========================================
+# Pipeline para percorrer todas as colunas
+# ========================================
+OPEN_TEXT_HINTS = {
+    "O que normalmente te impede de participar das atividades da BRASFI?",
+    "O que mais te motivaria a participar ativamente da BRASFI?",
+    "O que podemos ajustar para facilitar sua participação e engajamento? (Você pode selecionar mais de uma opção)",
+    "Qual tema ou formato de atividade te interessaria mais neste momento?",
+    "Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?",
+    "De que forma você poderia ajudar a potencializar a BRASFI? (Você pode selecionar mais de uma opção)"
+}
+
+for col in df.columns:
+    col_clean = clean_col(col)
+    series = df[col]
+
+    # Detecta múltipla seleção
+    if is_multiselect(series):
+        s = expand_multiselect(series)
+    else:
+        s = series
+
+    qtype = classify_question(s, open_text_hints=OPEN_TEXT_HINTS)
+    fname = sanitize_filename(col_clean)
+
+    if qtype == "open":
+        # Wordcloud
+        wordcloud_pt(s, title=col_clean, filename_prefix=fname)
+    else:
+        # Gráfico de pizza (% + n), com agregação opcional de fatias < 3%
+        pie_with_counts(s, title=col_clean, filename_prefix=fname, min_pct_other=0.03)
+
+        # Barras:
+        # - Se rótulos longos, usar codificação numérica + legenda (seu pedido).
+        # - Caso contrário, barras tradicionais com rótulos completos.
+        if qtype == "long_categorical":
+            barh_numeric(s, title=col_clean, filename_prefix=fname, order="frequency")
+        else:
+            # Barras tradicionais (apenas para referência visual)
+            counts = s.dropna().astype(str).value_counts()
+            plt.figure(figsize=(10, max(4, 0.4 * len(counts))))
+            sns.barplot(x=counts.values, y=counts.index, color=AVOCADO[0])
+            plt.xlabel("Frequência")
+            plt.ylabel("Categoria")
+            plt.title(col_clean, loc="left")
+            # anotar contagens
+            for i, v in enumerate(counts.values):
+                plt.text(v + counts.max()*0.01, i, str(v), va="center", fontsize=9)
+            plt.tight_layout()
+            plt.savefig(os.path.join("charts", f"{fname}_barh.png"), dpi=200, bbox_inches="tight")
+            plt.close()
+
+print("✅ Concluído: gráficos em 'charts/', nuvens de palavras em 'wordclouds/' e legendas em 'legends/'.")
 
 ```
 
@@ -199,6 +496,11 @@ for idx, col in enumerate(colunas_abertas, start=1):
 
 print(f"Word clouds saved in the '{output_dir}' directory with numeric filenames.")
 
+
+
+```
+
+```{python, ahrupa_não}
 
 
 ```

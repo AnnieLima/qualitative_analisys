@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Annie Cavalcante">
+
+<title>Qualitative Analysis - BRASFI</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analysis_files/libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analysis_files/libs/bootstrap/bootstrap-7bfc445d5145ff0366b23f01516eeac7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Qualitative Analysis - BRASFI</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Annie Cavalcante </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="preparing-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-for-analysis">Preparing for analysis</h2>
+<pre class="{r packages}"><code>#| message: false
+#| warning: false
+#| paged-print: false
+
+library(reticulate)
+reticulate::py_install("seaborn")
+reticulate::py_install("Unidecode")
+py_config()
+</code></pre>
+<pre class="{r, pandas}"><code>#|echo: FALSE
+#|message: FALSE
+
+# Install pandas, matplotlib, and wordcloud
+py_require(c("pandas", "matplotlib", "wordcloud"))
+py_require("nltk")
+py_require("openpyxl")
+py_require("seaborn")
+py_require("Unidecode")</code></pre>
+</section>
+<section id="qualitative-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="qualitative-analysis">Qualitative analysis</h2>
+<div id="121f317b" class="cell" data-message="false" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> wordcloud <span class="im">import</span> WordCloud</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The file contains responses to a questionnaire administered via Google Forms. The spreadsheet was reviewed, and multiple-choice and open-ended questions were identified. The main questions identified are:</p>
+<ul>
+<li><p>“O que normalmente te impede de participar das atividades da BRASFI?”</p></li>
+<li><p>“O que mais te motivaria a participar ativamente da BRASFI?”</p></li>
+<li><p>“O que podemos ajustar para facilitar sua participação e engajamento?”</p></li>
+<li><p>“Qual tema ou formato de atividade te interessaria mais neste momento?”</p></li>
+<li><p>“Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?”</p></li>
+<li><p>“De que forma você poderia ajudar a potencializar a BRASFI?”</p></li>
+</ul>
+<p>After identifying the main questions, it was necessary to remove columns that might contain sensitive data.</p>
+<div id="4581751c" class="cell" data-message="false" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Excel file</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>file_path <span class="op">=</span> <span class="st">"/cloud/project/survey_data.xlsx"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df_raw <span class="op">=</span> pd.read_excel(file_path, sheet_name<span class="op">=</span><span class="st">"Respostas ao formulário 1"</span>)  </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove the last column</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df_raw.iloc[:, <span class="dv">1</span>:<span class="op">-</span><span class="dv">1</span>].copy()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the modified DataFrame</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>df.head()</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Higienizar nomes das colunas (remover espaços duplicados, trims) ---</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_col(c):</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, <span class="bu">str</span>(c)).strip()</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> c</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>df.columns <span class="op">=</span> [clean_col(c) <span class="cf">for</span> c <span class="kw">in</span> df.columns]</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Conferência rápida ---</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Total de colunas (após remoção de 1ª e última):"</span>, df.shape[<span class="dv">1</span>])</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Primeiras 5 colunas:"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.columns[:<span class="dv">5</span>].tolist())</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Pastas de saída ---</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>os.makedirs(<span class="st">"charts"</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>os.makedirs(<span class="st">"wordclouds"</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total de colunas (após remoção de 1ª e última): 17
+Primeiras 5 colunas:
+['Qual é a sua motivação para participar da BRASFI? (Você pode selecionar mais de uma opção)', 'Você atualmente participa de algum setor, núcleo ou frente de trabalho dentro da BRASFI?', 'Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?', 'Nos últimos 6 meses, você participou de alguma atividade da BRASFI (Palestras, fóruns, webinars e mentoria)? (Você pode selecionar mais de uma opção)', 'O que normalmente te impede de participar das atividades da BRASFI?']</code></pre>
+</div>
+</div>
+<p>With the data loaded and sensitive columns removed, we next categorize the questions by type: multiple-choice and open-ended questions.</p>
+<ul>
+<li><p>Open-ended questions: These are questions that require an answer to be entered.</p></li>
+<li><p>Multiple-choice questions: Questions that provide a list of options to choose from, or that require you to select all applicable options.</p></li>
+</ul>
+<p>The first analysis will provide information about the “closed questions.” The aim is to understand which activities members frequently participate in, whether they participate in other activities and whether the format of the activities (e.g.&nbsp;lectures) meets their needs.</p>
+</section>
+<section id="functions-to-generate-the-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="functions-to-generate-the-graphs">Functions to generate the graphs</h2>
+<p>First, set out the necessary steps before creating the graphs. This includes defining colour palettes; in this case, I chose ‘avocado green’ because it resembles Brasfi’s colour identity. Then create the folder where the graphs will be saved.</p>
+<p>To improve the time necessary to create all the grpahs necessary, a set of functions were created to generate different types of graphs: pie charts, horizontal bar charts, and wordcloud chart.</p>
+<div id="ab091d44" class="cell" data-message="false" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ===============================</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Imports e configurações globais</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ===============================</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os, re, math, textwrap</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> wordcloud <span class="im">import</span> WordCloud, STOPWORDS</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> unidecode <span class="im">import</span> unidecode</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>mpl.rcParams[<span class="st">"font.family"</span>] <span class="op">=</span> <span class="st">"DejaVu Sans"</span>  <span class="co"># bom suporte a acentos</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8"</span>)                <span class="co"># estilo visual</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Paleta "avocado" + fallback para escalas longas</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>AVOCADO <span class="op">=</span> [<span class="st">"#568203"</span>, <span class="st">"#6B8E23"</span>, <span class="st">"#A9BA9D"</span>, <span class="st">"#B2D3C2"</span>, <span class="st">"#D0F0C0"</span>]</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_palette(n):</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">&lt;=</span> <span class="bu">len</span>(AVOCADO):</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AVOCADO[:n]</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Gera tons de verde se precisar de mais cores</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sns.color_palette(<span class="st">"Greens"</span>, n)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Pastas de saída</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>os.makedirs(<span class="st">"charts"</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>os.makedirs(<span class="st">"wordclouds"</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>os.makedirs(<span class="st">"legends"</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co"># =================</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Funções utilitárias</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co"># =================</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sanitize_filename(name: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">""</span>.join(c <span class="cf">if</span> c.isalnum() <span class="kw">or</span> c <span class="kw">in</span> <span class="st">"._-"</span> <span class="cf">else</span> <span class="st">"_"</span> <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">str</span>(name))</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_multiselect(series: pd.Series) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Se detectar separadores comuns (vírgula ou ponto-e-vírgula) em uma parcela significativa das linhas</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s.empty:</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    frac <span class="op">=</span> (s.<span class="bu">str</span>.contains(<span class="vs">r",</span><span class="cf">|</span><span class="vs">;"</span>)).mean()</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frac <span class="op">&gt;=</span> <span class="fl">0.15</span>  <span class="co"># ajustável</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> expand_multiselect(series: pd.Series, pattern<span class="op">=</span><span class="vs">r"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="cf">|</span><span class="dv">\s</span><span class="op">*</span><span class="vs">;</span><span class="dv">\s</span><span class="op">*</span><span class="vs">"</span>) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># separa e explode</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> s.<span class="bu">str</span>.split(pattern).explode().<span class="bu">str</span>.strip()</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># remove vazios</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> s[s <span class="op">!=</span> <span class="st">""</span>]</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classify_question(series: pd.Series, open_text_hints<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Heurística: 'open' (texto livre), 'long_categorical' (poucas categorias mas rótulos longos), 'categorical'."""</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> open_text_hints <span class="kw">and</span> series.name <span class="kw">in</span> open_text_hints:</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"open"</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    n_unique <span class="op">=</span> s.nunique()</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    avg_len <span class="op">=</span> s.<span class="bu">str</span>.<span class="bu">len</span>().mean() <span class="cf">if</span> <span class="kw">not</span> s.empty <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    unique_ratio <span class="op">=</span> n_unique <span class="op">/</span> <span class="bu">max</span>(<span class="bu">len</span>(s), <span class="dv">1</span>)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Muito variada -&gt; aberto</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_unique <span class="op">&gt;=</span> <span class="dv">30</span> <span class="kw">or</span> unique_ratio <span class="op">&gt;</span> <span class="fl">0.8</span>:</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"open"</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Poucas categorias, mas rótulos longos -&gt; barras com código numérico</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_unique <span class="op">&lt;=</span> <span class="dv">30</span> <span class="kw">and</span> (avg_len <span class="op">&gt;=</span> <span class="dv">30</span>):</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"long_categorical"</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"categorical"</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Barras horizontais com codificação numérica</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> barh_numeric(series: pd.Series, title: <span class="bu">str</span>, filename_prefix: <span class="bu">str</span>,</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>                 order<span class="op">=</span><span class="st">"frequency"</span>):</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="co">    - Converte categorias textuais em códigos 1..k.</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="co">    - Ordena por frequência (desc) por padrão.</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="co">    - Salva: gráfico .png em charts/, legenda .txt e .csv em legends/, e uma imagem de legenda .png.</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> s.value_counts(dropna<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> order <span class="op">==</span> <span class="st">"frequency"</span>:</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> <span class="bu">list</span>(counts.index)  <span class="co"># já vem ordenado por freq desc</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> <span class="bu">sorted</span>(counts.index, key<span class="op">=</span><span class="kw">lambda</span> x: <span class="bu">str</span>(x))</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>    codes <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(labels) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>    label_map <span class="op">=</span> {lab: code <span class="cf">for</span> lab, code <span class="kw">in</span> <span class="bu">zip</span>(labels, codes)}</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dados no eixo: códigos com contagens (ordenados por freq desc)</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>    plot_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>        <span class="st">"code"</span>: [label_map[lab] <span class="cf">for</span> lab <span class="kw">in</span> labels],</span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>: labels,</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>        <span class="st">"count"</span>: [counts[lab] <span class="cf">for</span> lab <span class="kw">in</span> labels]</span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>    }).sort_values(<span class="st">"count"</span>, ascending<span class="op">=</span><span class="va">True</span>)  <span class="co"># ascending p/ barra horizontal ascendente</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="bu">max</span>(<span class="dv">4</span>, <span class="fl">0.4</span> <span class="op">*</span> <span class="bu">len</span>(plot_df))))</span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> get_palette(<span class="bu">len</span>(plot_df))</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    bars <span class="op">=</span> plt.barh(plot_df[<span class="st">"code"</span>], plot_df[<span class="st">"count"</span>], color<span class="op">=</span>palette)</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>    plt.yticks(plot_df[<span class="st">"code"</span>], plot_df[<span class="st">"code"</span>])  <span class="co"># mostra só os códigos</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Frequência"</span>)</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"Código da categoria"</span>)</span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>    plt.title(title, loc<span class="op">=</span><span class="st">"left"</span>, wrap<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Anota a contagem na extremidade das barras</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bar, val <span class="kw">in</span> <span class="bu">zip</span>(bars, plot_df[<span class="st">"count"</span>]):</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>        plt.text(bar.get_width() <span class="op">+</span> <span class="bu">max</span>(plot_df[<span class="st">"count"</span>])<span class="op">*</span><span class="fl">0.01</span>, bar.get_y() <span class="op">+</span> bar.get_height()<span class="op">/</span><span class="dv">2</span>,</span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>                 <span class="ss">f"</span><span class="sc">{</span>val<span class="sc">}</span><span class="ss">"</span>, va<span class="op">=</span><span class="st">"center"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>    out_chart <span class="op">=</span> os.path.join(<span class="st">"charts"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_barh_numeric.png"</span>)</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>    plt.savefig(out_chart, dpi<span class="op">=</span><span class="dv">200</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>    plt.close()</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Legendas: TXT e CSV</span></span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>    legend_txt <span class="op">=</span> os.path.join(<span class="st">"legends"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_legend.txt"</span>)</span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>    legend_csv <span class="op">=</span> os.path.join(<span class="st">"legends"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_legend.csv"</span>)</span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(legend_txt, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>        f.write(<span class="ss">f"Legenda — </span><span class="sc">{</span>title<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">"</span>)</span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> lab <span class="kw">in</span> labels:</span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>            f.write(<span class="ss">f"</span><span class="sc">{</span>label_map[lab]<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>lab<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>    pd.DataFrame({<span class="st">"code"</span>: codes, <span class="st">"label"</span>: labels}).to_csv(legend_csv, index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>)</span>
+<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Legenda como imagem (tabela)</span></span>
+<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="bu">max</span>(<span class="fl">1.2</span>, <span class="fl">0.35</span> <span class="op">*</span> <span class="bu">len</span>(labels))))</span>
+<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>    table_data <span class="op">=</span> [[label_map[lab], lab] <span class="cf">for</span> lab <span class="kw">in</span> labels]</span>
+<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>    table <span class="op">=</span> ax.table(cellText<span class="op">=</span>table_data, colLabels<span class="op">=</span>[<span class="st">"Código"</span>, <span class="st">"Categoria"</span>], loc<span class="op">=</span><span class="st">"center"</span>, cellLoc<span class="op">=</span><span class="st">"left"</span>, colLoc<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>    table.auto_set_font_size(<span class="va">False</span>)</span>
+<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>    table.set_fontsize(<span class="dv">9</span>)</span>
+<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>    table.scale(<span class="dv">1</span>, <span class="fl">1.2</span>)</span>
+<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>    legend_img <span class="op">=</span> os.path.join(<span class="st">"legends"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_legend.png"</span>)</span>
+<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f"Legenda — </span><span class="sc">{</span>title<span class="sc">}</span><span class="ss">"</span>, loc<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>    plt.savefig(legend_img, dpi<span class="op">=</span><span class="dv">200</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a>    plt.close()</span>
+<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"chart"</span>: out_chart, <span class="st">"legend_txt"</span>: legend_txt, <span class="st">"legend_csv"</span>: legend_csv, <span class="st">"legend_img"</span>: legend_img}</span>
+<span id="cb6-139"><a href="#cb6-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-140"><a href="#cb6-140" aria-hidden="true" tabindex="-1"></a><span class="co"># ==========================</span></span>
+<span id="cb6-141"><a href="#cb6-141" aria-hidden="true" tabindex="-1"></a><span class="co"># Gráfico de Pizza (% + n)</span></span>
+<span id="cb6-142"><a href="#cb6-142" aria-hidden="true" tabindex="-1"></a><span class="co"># ==========================</span></span>
+<span id="cb6-143"><a href="#cb6-143" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pie_with_counts(series: pd.Series, title: <span class="bu">str</span>, filename_prefix: <span class="bu">str</span>,</span>
+<span id="cb6-144"><a href="#cb6-144" aria-hidden="true" tabindex="-1"></a>                    min_pct_other: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.0</span>):</span>
+<span id="cb6-145"><a href="#cb6-145" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-146"><a href="#cb6-146" aria-hidden="true" tabindex="-1"></a><span class="co">    - Fatias com 'xx.x% (n=k)'.</span></span>
+<span id="cb6-147"><a href="#cb6-147" aria-hidden="true" tabindex="-1"></a><span class="co">    - Legenda externa.</span></span>
+<span id="cb6-148"><a href="#cb6-148" aria-hidden="true" tabindex="-1"></a><span class="co">    - min_pct_other: agrega categorias &lt; esse percentual em 'Outros' (0.03 -&gt; 3%).</span></span>
+<span id="cb6-149"><a href="#cb6-149" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-150"><a href="#cb6-150" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-151"><a href="#cb6-151" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> s.value_counts()</span>
+<span id="cb6-152"><a href="#cb6-152" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="bu">int</span>(counts.<span class="bu">sum</span>())</span>
+<span id="cb6-153"><a href="#cb6-153" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> total <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-154"><a href="#cb6-154" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb6-155"><a href="#cb6-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-156"><a href="#cb6-156" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Agregar 'Outros' se solicitado</span></span>
+<span id="cb6-157"><a href="#cb6-157" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> min_pct_other <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;</span> min_pct_other <span class="op">&lt;</span> <span class="dv">1</span>:</span>
+<span id="cb6-158"><a href="#cb6-158" aria-hidden="true" tabindex="-1"></a>        pct <span class="op">=</span> counts <span class="op">/</span> total</span>
+<span id="cb6-159"><a href="#cb6-159" aria-hidden="true" tabindex="-1"></a>        small <span class="op">=</span> pct[pct <span class="op">&lt;</span> min_pct_other]</span>
+<span id="cb6-160"><a href="#cb6-160" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> small.empty:</span>
+<span id="cb6-161"><a href="#cb6-161" aria-hidden="true" tabindex="-1"></a>            counts <span class="op">=</span> counts[pct <span class="op">&gt;=</span> min_pct_other]</span>
+<span id="cb6-162"><a href="#cb6-162" aria-hidden="true" tabindex="-1"></a>            counts.loc[<span class="st">"Outros"</span>] <span class="op">=</span> small.<span class="bu">sum</span>()</span>
+<span id="cb6-163"><a href="#cb6-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-164"><a href="#cb6-164" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> <span class="bu">list</span>(counts.index)</span>
+<span id="cb6-165"><a href="#cb6-165" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="bu">list</span>(counts.values)</span>
+<span id="cb6-166"><a href="#cb6-166" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> get_palette(<span class="bu">len</span>(values))</span>
+<span id="cb6-167"><a href="#cb6-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-168"><a href="#cb6-168" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> autopct_fmt(pct):</span>
+<span id="cb6-169"><a href="#cb6-169" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="bu">int</span>(<span class="bu">round</span>(pct<span class="op">/</span><span class="fl">100.0</span> <span class="op">*</span> total))</span>
+<span id="cb6-170"><a href="#cb6-170" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>pct<span class="sc">:.1f}</span><span class="ss">% (n=</span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">)"</span> <span class="cf">if</span> n <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb6-171"><a href="#cb6-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-172"><a href="#cb6-172" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb6-173"><a href="#cb6-173" aria-hidden="true" tabindex="-1"></a>    wedges, texts, autotexts <span class="op">=</span> ax.pie(values,</span>
+<span id="cb6-174"><a href="#cb6-174" aria-hidden="true" tabindex="-1"></a>                                      startangle<span class="op">=</span><span class="dv">140</span>,</span>
+<span id="cb6-175"><a href="#cb6-175" aria-hidden="true" tabindex="-1"></a>                                      colors<span class="op">=</span>palette,</span>
+<span id="cb6-176"><a href="#cb6-176" aria-hidden="true" tabindex="-1"></a>                                      autopct<span class="op">=</span>autopct_fmt,</span>
+<span id="cb6-177"><a href="#cb6-177" aria-hidden="true" tabindex="-1"></a>                                      wedgeprops<span class="op">=</span><span class="bu">dict</span>(edgecolor<span class="op">=</span><span class="st">"white"</span>))</span>
+<span id="cb6-178"><a href="#cb6-178" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, loc<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb6-179"><a href="#cb6-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-180"><a href="#cb6-180" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Legenda à direita com rótulos + n</span></span>
+<span id="cb6-181"><a href="#cb6-181" aria-hidden="true" tabindex="-1"></a>    legend_labels <span class="op">=</span> [<span class="ss">f"</span><span class="sc">{</span>lab<span class="sc">}</span><span class="ss"> (n=</span><span class="sc">{</span>val<span class="sc">}</span><span class="ss">)"</span> <span class="cf">for</span> lab, val <span class="kw">in</span> <span class="bu">zip</span>(labels, values)]</span>
+<span id="cb6-182"><a href="#cb6-182" aria-hidden="true" tabindex="-1"></a>    ax.legend(wedges, legend_labels, title<span class="op">=</span><span class="st">"Categorias"</span>, loc<span class="op">=</span><span class="st">"center left"</span>, bbox_to_anchor<span class="op">=</span>(<span class="dv">1</span>, <span class="fl">0.5</span>))</span>
+<span id="cb6-183"><a href="#cb6-183" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"equal"</span>)</span>
+<span id="cb6-184"><a href="#cb6-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-185"><a href="#cb6-185" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb6-186"><a href="#cb6-186" aria-hidden="true" tabindex="-1"></a>    out_path <span class="op">=</span> os.path.join(<span class="st">"charts"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_pie.png"</span>)</span>
+<span id="cb6-187"><a href="#cb6-187" aria-hidden="true" tabindex="-1"></a>    plt.savefig(out_path, dpi<span class="op">=</span><span class="dv">200</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb6-188"><a href="#cb6-188" aria-hidden="true" tabindex="-1"></a>    plt.close()</span>
+<span id="cb6-189"><a href="#cb6-189" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out_path</span>
+<span id="cb6-190"><a href="#cb6-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-191"><a href="#cb6-191" aria-hidden="true" tabindex="-1"></a><span class="co"># ==================================</span></span>
+<span id="cb6-192"><a href="#cb6-192" aria-hidden="true" tabindex="-1"></a><span class="co"># Wordcloud (Português + custom list)</span></span>
+<span id="cb6-193"><a href="#cb6-193" aria-hidden="true" tabindex="-1"></a><span class="co"># ==================================</span></span>
+<span id="cb6-194"><a href="#cb6-194" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_pt_stopwords(extra<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-195"><a href="#cb6-195" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Base WordCloud + tentativa de NLTK (portuguese). Se NLTK indisponível, segue sem travar.</span></span>
+<span id="cb6-196"><a href="#cb6-196" aria-hidden="true" tabindex="-1"></a>    sw <span class="op">=</span> <span class="bu">set</span>(STOPWORDS)</span>
+<span id="cb6-197"><a href="#cb6-197" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb6-198"><a href="#cb6-198" aria-hidden="true" tabindex="-1"></a>        <span class="im">import</span> nltk</span>
+<span id="cb6-199"><a href="#cb6-199" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb6-200"><a href="#cb6-200" aria-hidden="true" tabindex="-1"></a>            nltk.data.find(<span class="st">"corpora/stopwords"</span>)</span>
+<span id="cb6-201"><a href="#cb6-201" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">LookupError</span>:</span>
+<span id="cb6-202"><a href="#cb6-202" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Pode falhar no ambiente offline; ignore se não conseguir baixar</span></span>
+<span id="cb6-203"><a href="#cb6-203" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="cb6-204"><a href="#cb6-204" aria-hidden="true" tabindex="-1"></a>                nltk.download(<span class="st">"stopwords"</span>, quiet<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-205"><a href="#cb6-205" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb6-206"><a href="#cb6-206" aria-hidden="true" tabindex="-1"></a>                <span class="cf">pass</span></span>
+<span id="cb6-207"><a href="#cb6-207" aria-hidden="true" tabindex="-1"></a>        <span class="im">from</span> nltk.corpus <span class="im">import</span> stopwords <span class="im">as</span> nltk_sw</span>
+<span id="cb6-208"><a href="#cb6-208" aria-hidden="true" tabindex="-1"></a>        sw.update(nltk_sw.words(<span class="st">"portuguese"</span>))</span>
+<span id="cb6-209"><a href="#cb6-209" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb6-210"><a href="#cb6-210" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb6-211"><a href="#cb6-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-212"><a href="#cb6-212" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sua lista customizada (derivada do analysis_v1)</span></span>
+<span id="cb6-213"><a href="#cb6-213" aria-hidden="true" tabindex="-1"></a>    custom <span class="op">=</span> {</span>
+<span id="cb6-214"><a href="#cb6-214" aria-hidden="true" tabindex="-1"></a>        <span class="st">"a"</span>,<span class="st">"à"</span>,<span class="st">"acho"</span>,<span class="st">"acredito"</span>,<span class="st">"ajudar"</span>,<span class="st">"algo"</span>,<span class="st">"algum"</span>,<span class="st">"alguns"</span>,<span class="st">"além"</span>,<span class="st">"ao"</span>,<span class="st">"aos"</span>,<span class="st">"após"</span>,<span class="st">"as"</span>, <span class="st">"atuos"</span>, <span class="st">"dia"</span>, <span class="st">"logo"</span>, </span>
+<span id="cb6-215"><a href="#cb6-215" aria-hidden="true" tabindex="-1"></a>        <span class="st">"atividade"</span>,<span class="st">"até"</span>,<span class="st">"bem"</span>,<span class="st">"brasfi"</span>,<span class="st">"cada"</span>,<span class="st">"como"</span>,<span class="st">"consigo"</span>,<span class="st">"cop30"</span>,<span class="st">"da"</span>,<span class="st">"das"</span>,<span class="st">"de"</span>,<span class="st">"do"</span>,<span class="st">"dos"</span>,</span>
+<span id="cb6-216"><a href="#cb6-216" aria-hidden="true" tabindex="-1"></a>        <span class="st">"e"</span>,<span class="st">"em"</span>,<span class="st">"entanto"</span>,<span class="st">"entre"</span>,<span class="st">"essa"</span>,<span class="st">"essas"</span>,<span class="st">"esse"</span>,<span class="st">"esses"</span>,<span class="st">"esta"</span>,<span class="st">"estao"</span>,<span class="st">"estas"</span>,<span class="st">"estou"</span>,<span class="st">"estão"</span>,</span>
+<span id="cb6-217"><a href="#cb6-217" aria-hidden="true" tabindex="-1"></a>        <span class="st">"etc"</span>,<span class="st">"eu"</span>,<span class="st">"fazendo"</span>,<span class="st">"gt"</span>,<span class="st">"gts"</span>, <span class="st">"ir"</span>,<span class="st">"isso"</span>,<span class="st">"isto"</span>,<span class="st">"já"</span>,<span class="st">"maior"</span>,<span class="st">"mais"</span>,<span class="st">"mas"</span>,<span class="st">"meio"</span>,<span class="st">"menor"</span>,<span class="st">"menos"</span>,</span>
+<span id="cb6-218"><a href="#cb6-218" aria-hidden="true" tabindex="-1"></a>        <span class="st">"meu"</span>,<span class="st">"mim"</span>,<span class="st">"minha"</span>,<span class="st">"minhas"</span>,<span class="st">"momento"</span>,<span class="st">"muito"</span>,<span class="st">"na"</span>,<span class="st">"nada"</span>,<span class="st">"nas"</span>,<span class="st">"neste"</span>,<span class="st">"no"</span>,<span class="st">"no entanto"</span>,<span class="st">"nos"</span>,</span>
+<span id="cb6-219"><a href="#cb6-219" aria-hidden="true" tabindex="-1"></a>        <span class="st">"nossa"</span>,<span class="st">"nossas"</span>,<span class="st">"não"</span>,<span class="st">"o"</span>,<span class="st">"os"</span>,<span class="st">"ou"</span>,<span class="st">"para"</span>,<span class="st">"participar"</span>,<span class="st">"pela"</span>,<span class="st">"pelas"</span>,<span class="st">"pelos"</span>,<span class="st">"poderia"</span>,<span class="st">"pois"</span>,</span>
+<span id="cb6-220"><a href="#cb6-220" aria-hidden="true" tabindex="-1"></a>        <span class="st">"por"</span>,<span class="st">"porque"</span>,<span class="st">"porém"</span>,<span class="st">"posso"</span>,<span class="st">"pra"</span>,<span class="st">"pouco"</span>,<span class="st">"quais"</span>,<span class="st">"que"</span>,<span class="st">"quem"</span>,<span class="st">"queria"</span>,<span class="st">"s2"</span>,<span class="st">"se"</span>,<span class="st">"ser"</span>,<span class="st">"sei"</span>,</span>
+<span id="cb6-221"><a href="#cb6-221" aria-hidden="true" tabindex="-1"></a>        <span class="st">"seria"</span>,<span class="st">"sinto"</span>,<span class="st">"sobre"</span>,<span class="st">"são"</span>,<span class="st">"só"</span>,<span class="st">"tem"</span>,<span class="st">"tenho"</span>,<span class="st">"ter"</span>,<span class="st">"todo"</span>,<span class="st">"todos"</span>,<span class="st">"tudo"</span>,<span class="st">"um"</span>,<span class="st">"uma"</span>,<span class="st">"umas"</span>,<span class="st">"uns"</span>,</span>
+<span id="cb6-222"><a href="#cb6-222" aria-hidden="true" tabindex="-1"></a>        <span class="st">"usar"</span>,<span class="st">"vezes"</span>,<span class="st">"vi"</span>,<span class="st">"vir"</span>,<span class="st">"vivi"</span>,<span class="st">"vocês"</span>,<span class="st">"é"</span>,<span class="st">"uso"</span>,<span class="st">"faz"</span>, <span class="st">"paulo"</span>, <span class="st">"m"</span>, <span class="st">"gral"</span>, <span class="st">"niveis"</span>, <span class="st">"fiquem"</span>, <span class="st">"apenas"</span>, <span class="st">"antigos"</span>, <span class="st">"consegui"</span>, <span class="st">"sido"</span>, <span class="st">"hoje"</span>, <span class="st">"permitam"</span>, <span class="st">"conseguimos"</span>, <span class="st">"fizeram"</span>, <span class="st">"sugiro"</span>, <span class="st">"p"</span>, <span class="st">"quero"</span>, <span class="st">"fazer"</span>, <span class="st">"propria"</span>, <span class="st">"participei"</span>, <span class="st">"ainda"</span>, <span class="st">"irei"</span> <span class="st">"fará"</span>, <span class="st">"gerar"</span>, <span class="st">"gera"</span>, <span class="st">"próprio"</span>, <span class="st">"própria"</span>, <span class="st">"irão"</span>, <span class="st">"marcas"</span></span>
+<span id="cb6-223"><a href="#cb6-223" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-224"><a href="#cb6-224" aria-hidden="true" tabindex="-1"></a>    sw.update(custom)</span>
+<span id="cb6-225"><a href="#cb6-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-226"><a href="#cb6-226" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adicionar variações sem acento para capturar ambas as formas</span></span>
+<span id="cb6-227"><a href="#cb6-227" aria-hidden="true" tabindex="-1"></a>    sw_noacc <span class="op">=</span> {unidecode(x) <span class="cf">for</span> x <span class="kw">in</span> sw}</span>
+<span id="cb6-228"><a href="#cb6-228" aria-hidden="true" tabindex="-1"></a>    sw.update(sw_noacc)</span>
+<span id="cb6-229"><a href="#cb6-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-230"><a href="#cb6-230" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> extra:</span>
+<span id="cb6-231"><a href="#cb6-231" aria-hidden="true" tabindex="-1"></a>        sw.update({w.lower().strip() <span class="cf">for</span> w <span class="kw">in</span> extra})</span>
+<span id="cb6-232"><a href="#cb6-232" aria-hidden="true" tabindex="-1"></a>        sw.update({unidecode(w.lower().strip()) <span class="cf">for</span> w <span class="kw">in</span> extra})</span>
+<span id="cb6-233"><a href="#cb6-233" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sw</span>
+<span id="cb6-234"><a href="#cb6-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-235"><a href="#cb6-235" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> wordcloud_pt(text_series: pd.Series, title: <span class="bu">str</span>, filename_prefix: <span class="bu">str</span>,</span>
+<span id="cb6-236"><a href="#cb6-236" aria-hidden="true" tabindex="-1"></a>                 extra_stopwords<span class="op">=</span><span class="va">None</span>, width<span class="op">=</span><span class="dv">1000</span>, height<span class="op">=</span><span class="dv">500</span>):</span>
+<span id="cb6-237"><a href="#cb6-237" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> text_series.dropna().astype(<span class="bu">str</span>)</span>
+<span id="cb6-238"><a href="#cb6-238" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s.empty:</span>
+<span id="cb6-239"><a href="#cb6-239" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb6-240"><a href="#cb6-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-241"><a href="#cb6-241" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Limpeza leve e normalização</span></span>
+<span id="cb6-242"><a href="#cb6-242" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">" "</span>.join(s.tolist())</span>
+<span id="cb6-243"><a href="#cb6-243" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mantém acentos no visual; remove apenas URLs e excesso de espaços</span></span>
+<span id="cb6-244"><a href="#cb6-244" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"http</span><span class="dv">\S</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, text)</span>
+<span id="cb6-245"><a href="#cb6-245" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">" "</span>, text).strip().lower()</span>
+<span id="cb6-246"><a href="#cb6-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-247"><a href="#cb6-247" aria-hidden="true" tabindex="-1"></a>    sw <span class="op">=</span> build_pt_stopwords(extra_stopwords)</span>
+<span id="cb6-248"><a href="#cb6-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-249"><a href="#cb6-249" aria-hidden="true" tabindex="-1"></a>    wc <span class="op">=</span> WordCloud(width<span class="op">=</span>width, height<span class="op">=</span>height, background_color<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb6-250"><a href="#cb6-250" aria-hidden="true" tabindex="-1"></a>                   stopwords<span class="op">=</span>sw, collocations<span class="op">=</span><span class="va">False</span>, prefer_horizontal<span class="op">=</span><span class="fl">0.95</span>,</span>
+<span id="cb6-251"><a href="#cb6-251" aria-hidden="true" tabindex="-1"></a>                   colormap<span class="op">=</span><span class="st">"summer"</span>).generate(text)</span>
+<span id="cb6-252"><a href="#cb6-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-253"><a href="#cb6-253" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb6-254"><a href="#cb6-254" aria-hidden="true" tabindex="-1"></a>    plt.imshow(wc, interpolation<span class="op">=</span><span class="st">"bilinear"</span>)</span>
+<span id="cb6-255"><a href="#cb6-255" aria-hidden="true" tabindex="-1"></a>    plt.axis(<span class="st">"off"</span>)</span>
+<span id="cb6-256"><a href="#cb6-256" aria-hidden="true" tabindex="-1"></a>    plt.title(title, loc<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb6-257"><a href="#cb6-257" aria-hidden="true" tabindex="-1"></a>    out_path <span class="op">=</span> os.path.join(<span class="st">"wordclouds"</span>, <span class="ss">f"</span><span class="sc">{</span>filename_prefix<span class="sc">}</span><span class="ss">_wordcloud.png"</span>)</span>
+<span id="cb6-258"><a href="#cb6-258" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb6-259"><a href="#cb6-259" aria-hidden="true" tabindex="-1"></a>    plt.savefig(out_path, dpi<span class="op">=</span><span class="dv">200</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb6-260"><a href="#cb6-260" aria-hidden="true" tabindex="-1"></a>    plt.close()</span>
+<span id="cb6-261"><a href="#cb6-261" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out_path</span>
+<span id="cb6-262"><a href="#cb6-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-263"><a href="#cb6-263" aria-hidden="true" tabindex="-1"></a><span class="co"># ========================================</span></span>
+<span id="cb6-264"><a href="#cb6-264" aria-hidden="true" tabindex="-1"></a><span class="co"># Pipeline para percorrer todas as colunas</span></span>
+<span id="cb6-265"><a href="#cb6-265" aria-hidden="true" tabindex="-1"></a><span class="co"># ========================================</span></span>
+<span id="cb6-266"><a href="#cb6-266" aria-hidden="true" tabindex="-1"></a>OPEN_TEXT_HINTS <span class="op">=</span> {</span>
+<span id="cb6-267"><a href="#cb6-267" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que normalmente te impede de participar das atividades da BRASFI?"</span>,</span>
+<span id="cb6-268"><a href="#cb6-268" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que mais te motivaria a participar ativamente da BRASFI?"</span>,</span>
+<span id="cb6-269"><a href="#cb6-269" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que podemos ajustar para facilitar sua participação e engajamento? (Você pode selecionar mais de uma opção)"</span>,</span>
+<span id="cb6-270"><a href="#cb6-270" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Qual tema ou formato de atividade te interessaria mais neste momento?"</span>,</span>
+<span id="cb6-271"><a href="#cb6-271" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?"</span>,</span>
+<span id="cb6-272"><a href="#cb6-272" aria-hidden="true" tabindex="-1"></a>    <span class="st">"De que forma você poderia ajudar a potencializar a BRASFI? (Você pode selecionar mais de uma opção)"</span></span>
+<span id="cb6-273"><a href="#cb6-273" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-274"><a href="#cb6-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-275"><a href="#cb6-275" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> df.columns:</span>
+<span id="cb6-276"><a href="#cb6-276" aria-hidden="true" tabindex="-1"></a>    col_clean <span class="op">=</span> clean_col(col)</span>
+<span id="cb6-277"><a href="#cb6-277" aria-hidden="true" tabindex="-1"></a>    series <span class="op">=</span> df[col]</span>
+<span id="cb6-278"><a href="#cb6-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-279"><a href="#cb6-279" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Detecta múltipla seleção</span></span>
+<span id="cb6-280"><a href="#cb6-280" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_multiselect(series):</span>
+<span id="cb6-281"><a href="#cb6-281" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> expand_multiselect(series)</span>
+<span id="cb6-282"><a href="#cb6-282" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-283"><a href="#cb6-283" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> series</span>
+<span id="cb6-284"><a href="#cb6-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-285"><a href="#cb6-285" aria-hidden="true" tabindex="-1"></a>    qtype <span class="op">=</span> classify_question(s, open_text_hints<span class="op">=</span>OPEN_TEXT_HINTS)</span>
+<span id="cb6-286"><a href="#cb6-286" aria-hidden="true" tabindex="-1"></a>    fname <span class="op">=</span> sanitize_filename(col_clean)</span>
+<span id="cb6-287"><a href="#cb6-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-288"><a href="#cb6-288" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> qtype <span class="op">==</span> <span class="st">"open"</span>:</span>
+<span id="cb6-289"><a href="#cb6-289" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Wordcloud</span></span>
+<span id="cb6-290"><a href="#cb6-290" aria-hidden="true" tabindex="-1"></a>        wordcloud_pt(s, title<span class="op">=</span>col_clean, filename_prefix<span class="op">=</span>fname)</span>
+<span id="cb6-291"><a href="#cb6-291" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-292"><a href="#cb6-292" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Gráfico de pizza (% + n), com agregação opcional de fatias &lt; 3%</span></span>
+<span id="cb6-293"><a href="#cb6-293" aria-hidden="true" tabindex="-1"></a>        pie_with_counts(s, title<span class="op">=</span>col_clean, filename_prefix<span class="op">=</span>fname, min_pct_other<span class="op">=</span><span class="fl">0.03</span>)</span>
+<span id="cb6-294"><a href="#cb6-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-295"><a href="#cb6-295" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Barras:</span></span>
+<span id="cb6-296"><a href="#cb6-296" aria-hidden="true" tabindex="-1"></a>        <span class="co"># - Se rótulos longos, usar codificação numérica + legenda (seu pedido).</span></span>
+<span id="cb6-297"><a href="#cb6-297" aria-hidden="true" tabindex="-1"></a>        <span class="co"># - Caso contrário, barras tradicionais com rótulos completos.</span></span>
+<span id="cb6-298"><a href="#cb6-298" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> qtype <span class="op">==</span> <span class="st">"long_categorical"</span>:</span>
+<span id="cb6-299"><a href="#cb6-299" aria-hidden="true" tabindex="-1"></a>            barh_numeric(s, title<span class="op">=</span>col_clean, filename_prefix<span class="op">=</span>fname, order<span class="op">=</span><span class="st">"frequency"</span>)</span>
+<span id="cb6-300"><a href="#cb6-300" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-301"><a href="#cb6-301" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Barras tradicionais (apenas para referência visual)</span></span>
+<span id="cb6-302"><a href="#cb6-302" aria-hidden="true" tabindex="-1"></a>            counts <span class="op">=</span> s.dropna().astype(<span class="bu">str</span>).value_counts()</span>
+<span id="cb6-303"><a href="#cb6-303" aria-hidden="true" tabindex="-1"></a>            plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="bu">max</span>(<span class="dv">4</span>, <span class="fl">0.4</span> <span class="op">*</span> <span class="bu">len</span>(counts))))</span>
+<span id="cb6-304"><a href="#cb6-304" aria-hidden="true" tabindex="-1"></a>            sns.barplot(x<span class="op">=</span>counts.values, y<span class="op">=</span>counts.index, color<span class="op">=</span>AVOCADO[<span class="dv">0</span>])</span>
+<span id="cb6-305"><a href="#cb6-305" aria-hidden="true" tabindex="-1"></a>            plt.xlabel(<span class="st">"Frequência"</span>)</span>
+<span id="cb6-306"><a href="#cb6-306" aria-hidden="true" tabindex="-1"></a>            plt.ylabel(<span class="st">"Categoria"</span>)</span>
+<span id="cb6-307"><a href="#cb6-307" aria-hidden="true" tabindex="-1"></a>            plt.title(col_clean, loc<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb6-308"><a href="#cb6-308" aria-hidden="true" tabindex="-1"></a>            <span class="co"># anotar contagens</span></span>
+<span id="cb6-309"><a href="#cb6-309" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i, v <span class="kw">in</span> <span class="bu">enumerate</span>(counts.values):</span>
+<span id="cb6-310"><a href="#cb6-310" aria-hidden="true" tabindex="-1"></a>                plt.text(v <span class="op">+</span> counts.<span class="bu">max</span>()<span class="op">*</span><span class="fl">0.01</span>, i, <span class="bu">str</span>(v), va<span class="op">=</span><span class="st">"center"</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb6-311"><a href="#cb6-311" aria-hidden="true" tabindex="-1"></a>            plt.tight_layout()</span>
+<span id="cb6-312"><a href="#cb6-312" aria-hidden="true" tabindex="-1"></a>            plt.savefig(os.path.join(<span class="st">"charts"</span>, <span class="ss">f"</span><span class="sc">{</span>fname<span class="sc">}</span><span class="ss">_barh.png"</span>), dpi<span class="op">=</span><span class="dv">200</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb6-313"><a href="#cb6-313" aria-hidden="true" tabindex="-1"></a>            plt.close()</span>
+<span id="cb6-314"><a href="#cb6-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-315"><a href="#cb6-315" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"✅ Concluído: gráficos em 'charts/', nuvens de palavras em 'wordclouds/' e legendas em 'legends/'."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Concluído: gráficos em 'charts/', nuvens de palavras em 'wordclouds/' e legendas em 'legends/'.</code></pre>
+</div>
+</div>
+<p>These plots summarize the responses to each closed question, making it easier to visualize trends and preferences among participants.</p>
+<div id="c94bc9cd" class="cell" data-message="false" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> wordcloud <span class="im">import</span> WordCloud, STOPWORDS</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct column names with trailing spaces</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>colunas_abertas <span class="op">=</span> [</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que normalmente te impede de participar das atividades da BRASFI?"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que mais te motivaria a participar ativamente da BRASFI?"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"O que podemos ajustar para facilitar sua participação e engajamento?  (Você pode selecionar mais de uma opção)"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Qual tema ou formato de atividade te interessaria mais neste momento?"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Se você pudesse mudar algo na BRASFI com um estalar de dedos, o que seria?"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"De que forma você poderia ajudar a potencializar a BRASFI?  (Você pode selecionar mais de uma opção)"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Expand stopwords list</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>stopwords <span class="op">=</span> <span class="bu">set</span>(STOPWORDS)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>stopwords.update([</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"a"</span>,<span class="st">"à"</span>, <span class="st">"acho"</span>, <span class="st">"acredito"</span>, <span class="st">"ajudar"</span>, <span class="st">"algo"</span>, <span class="st">"algum"</span>, <span class="st">"alguns"</span>, <span class="st">"além"</span>, <span class="st">"ao"</span>, <span class="st">"aos"</span>, <span class="st">"após"</span>, <span class="st">"as"</span>, <span class="st">"atividade"</span>, <span class="st">"até"</span>, <span class="st">"bem"</span>, <span class="st">"BRASFI"</span>, <span class="st">"cada"</span>, <span class="st">"como"</span>, <span class="st">"consigo"</span>, <span class="st">"COP30"</span>, <span class="st">"da"</span>, <span class="st">"das"</span>, <span class="st">"de"</span>, <span class="st">"do"</span>, <span class="st">"dos"</span>, <span class="st">"e"</span>, <span class="st">"em"</span>, <span class="st">"entanto"</span>, <span class="st">"entre"</span>, <span class="st">"essa"</span>, <span class="st">"essas"</span>, <span class="st">"esse"</span>, <span class="st">"esses"</span>, <span class="st">"esta"</span>, <span class="st">"estao"</span>, <span class="st">"estas"</span>, <span class="st">"estou"</span>, <span class="st">"estão"</span>, <span class="st">"etc"</span>, <span class="st">"eu"</span>, <span class="st">"fazendo"</span>, <span class="st">"GT"</span>, <span class="st">"ir"</span>, <span class="st">"isso"</span>, <span class="st">"isto"</span>, <span class="st">"já"</span>, <span class="st">"maior"</span>, <span class="st">"mais"</span>, <span class="st">"mas"</span>, <span class="st">"meio"</span>, <span class="st">"menor"</span>, <span class="st">"menos"</span>, <span class="st">"meu"</span>, <span class="st">"mim"</span>, <span class="st">"minha"</span>, <span class="st">"minhas"</span>, <span class="st">"momento"</span>, <span class="st">"muito"</span>, <span class="st">"na"</span>, <span class="st">"nada"</span>, <span class="st">"nas"</span>, <span class="st">"neste"</span>, <span class="st">"no"</span>, <span class="st">"no entanto"</span>, <span class="st">"nos"</span>, <span class="st">"nossa"</span>, <span class="st">"nossas"</span>, <span class="st">"não"</span>, <span class="st">"o"</span>, <span class="st">"os"</span>, <span class="st">"ou"</span>, <span class="st">"para"</span>, <span class="st">"participar"</span>, <span class="st">"pela"</span>, <span class="st">"pelas"</span>, <span class="st">"pelos"</span>, <span class="st">"poderia"</span>, <span class="st">"pois"</span>, <span class="st">"por"</span>, <span class="st">"porque"</span>, <span class="st">"porém"</span>, <span class="st">"posso"</span>, <span class="st">"pra"</span>, <span class="st">"pouco"</span>, <span class="st">"Vi"</span>,  <span class="st">"quais"</span>, <span class="st">"que"</span>, <span class="st">"quem"</span>, <span class="st">"queria"</span>, <span class="st">"S2"</span>, <span class="st">"se"</span>,<span class="st">"ser"</span>, <span class="st">"sei"</span>, <span class="st">"seria"</span>, <span class="st">"sinto"</span>, <span class="st">"sobre"</span>, <span class="st">"são"</span>, <span class="st">"só"</span>, <span class="st">"tem"</span>, <span class="st">"tenho"</span>, <span class="st">"ter"</span>, <span class="st">"todos"</span>, <span class="st">"tudo"</span>, <span class="st">"um"</span>, <span class="st">"uma"</span>, <span class="st">"umas"</span>, <span class="st">"uns"</span>, <span class="st">"usar"</span>, <span class="st">"vezes"</span>, <span class="st">"vi"</span>, <span class="st">"vir"</span>, <span class="st">"vivi"</span>, <span class="st">"vocês"</span>, <span class="st">"é"</span>, <span class="st">"uso"</span>, <span class="st">"faz"</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Create output directory</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>output_dir <span class="op">=</span> <span class="st">"wordcloud"</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>os.makedirs(output_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate and save word clouds with numeric filenames</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, col <span class="kw">in</span> <span class="bu">enumerate</span>(colunas_abertas, start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> col <span class="kw">in</span> df.columns:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        texto <span class="op">=</span> <span class="st">" "</span>.join(<span class="bu">str</span>(v) <span class="cf">for</span> v <span class="kw">in</span> df[col].dropna().tolist())</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        wc <span class="op">=</span> WordCloud(width<span class="op">=</span><span class="dv">800</span>, height<span class="op">=</span><span class="dv">400</span>, background_color<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                       stopwords<span class="op">=</span>stopwords, collocations<span class="op">=</span><span class="va">False</span>).generate(texto)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        plt.imshow(wc, interpolation<span class="op">=</span><span class="st">"bilinear"</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        plt.axis(<span class="st">"off"</span>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        plt.title(col.strip(), fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        plt.tight_layout()</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        filename <span class="op">=</span> os.path.join(output_dir, <span class="ss">f"</span><span class="sc">{</span>idx<span class="sc">}</span><span class="ss">.png"</span>)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        plt.savefig(filename, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        plt.close()</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Word clouds saved in the '</span><span class="sc">{</span>output_dir<span class="sc">}</span><span class="ss">' directory with numeric filenames."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Word clouds saved in the 'wordcloud' directory with numeric filenames.</code></pre>
+</div>
+</div>
+<div id="659d0997" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># === PATCH: agrupar as duas respostas negativas em "Não" ===</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> unicodedata</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> strip_accents(s: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pd.isna(s):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> s</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="bu">str</span>(s)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">""</span>.join(ch <span class="cf">for</span> ch <span class="kw">in</span> unicodedata.normalize(<span class="st">"NFD"</span>, s) <span class="cf">if</span> unicodedata.category(ch) <span class="op">!=</span> <span class="st">"Mn"</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefixo da pergunta (use o início do enunciado para localizar a coluna)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>ALINH_PREFIX <span class="op">=</span> <span class="st">"Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava"</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Tenta achar a coluna pelo prefixo (após clean_col)</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>alin_cols <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> c.startswith(ALINH_PREFIX)]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> alin_cols:</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    alin_col <span class="op">=</span> alin_cols[<span class="dv">0</span>]</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Série normalizada (minúsculas + sem acentos) para facilitar matching</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    s_norm <span class="op">=</span> df[alin_col].astype(<span class="bu">str</span>).<span class="bu">str</span>.lower().<span class="bu">map</span>(strip_accents)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Máscaras para as duas frases negativas (tolerante a pequenas variações)</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    mask_nao_1 <span class="op">=</span> s_norm.<span class="bu">str</span>.contains(<span class="st">"sinto que o retorno nao esta alinhado"</span>, na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    mask_nao_2 <span class="op">=</span> s_norm.<span class="bu">str</span>.contains(<span class="st">"sinto que entreguei mais do que obtive"</span>, na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Contagem antes/depois (para conferência no console)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    before <span class="op">=</span> df[alin_col].value_counts(dropna<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    df.loc[mask_nao_1 <span class="op">|</span> mask_nao_2, alin_col] <span class="op">=</span> <span class="st">"Não"</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    after <span class="op">=</span> df[alin_col].value_counts(dropna<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">[Recodificação — Alinhamento]"</span>)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Antes:</span><span class="ch">\n</span><span class="st">"</span>, before)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Depois:</span><span class="ch">\n</span><span class="st">"</span>, after)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Aviso: não encontrei a coluna da pergunta de alinhamento. Verifique o cabeçalho."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+[Recodificação — Alinhamento]
+Antes:
+ Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?
+Sim, sinto que é uma troca justa                                   23
+Não tenho opinião formada sobre isso                               12
+Não, sinto que o retorno não está alinhado às minhas motivações     5
+Não, sinto que entreguei mais do que obtive em retorno              3
+Name: count, dtype: int64
+
+Depois:
+ Você sente que existe alinhamento entre suas entregas para a BRASFI e o retorno que você esperava (aprendizado, conexões, visibilidade, etc)?
+Sim, sinto que é uma troca justa        23
+Não tenho opinião formada sobre isso    12
+Não                                      8
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
