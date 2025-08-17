@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 *.xlsx
+.charts_v1
+.wordcloud
+.wordclouds_v1
+.analysis_pilot_files
+.analysis_files
