@@ -154,11 +154,11 @@ def barh_numeric(series: pd.Series, title: str, filename_prefix: str, order="fre
     maxv = plot_df["count"].max()
     for bar, val in zip(bars, plot_df["count"]):
         plt.text(bar.get_width() + maxv*0.01, bar.get_y() + bar.get_height()/2,
-                 f"{val}", va="center", fontsize=9)
+                 f"{val}", va="center", fontsize=10)
 
     plt.tight_layout()
     out_chart = os.path.join("charts", f"{filename_prefix}_barh_numeric.png")
-    plt.savefig(out_chart, dpi=200, bbox_inches="tight")
+    plt.savefig(out_chart, dpi=300, bbox_inches="tight")
     plt.close()
 
     # Legendas: TXT, CSV e PNG (tabela)
@@ -175,11 +175,11 @@ def barh_numeric(series: pd.Series, title: str, filename_prefix: str, order="fre
     table_data = [[label_map[lab], lab] for lab in labels]
     table = ax.table(cellText=table_data, colLabels=["Código", "Categoria"], loc="center", cellLoc="left", colLoc="left")
     table.auto_set_font_size(False)
-    table.set_fontsize(9)
+    table.set_fontsize(10)
     table.scale(1, 1.2)
     legend_img = os.path.join("legends", f"{filename_prefix}_legend.png")
     plt.title(f"Legenda — {title}", loc="left")
-    plt.savefig(legend_img, dpi=200, bbox_inches="tight")
+    plt.savefig(legend_img, dpi=300, bbox_inches="tight")
     plt.close()
 
     return {"chart": out_chart, "legend_txt": legend_txt, "legend_csv": legend_csv, "legend_img": legend_img}
@@ -216,7 +216,7 @@ def pie_with_counts(series: pd.Series, title: str, filename_prefix: str, min_pct
     ax.axis("equal")
     plt.tight_layout()
     out_path = os.path.join("charts", f"{filename_prefix}_pie.png")
-    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
     return out_path
 
@@ -286,7 +286,7 @@ def wordcloud_pt(text_series: pd.Series, title: str, filename_prefix: str,
     plt.title(title, loc="left")
     out_path = os.path.join("wordclouds", f"{filename_prefix}_wordcloud.png")
     plt.tight_layout()
-    plt.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
     return out_path
 
@@ -341,9 +341,9 @@ for col in df.columns:
                 plt.title(col_clean, loc="left")
                 maxv = counts.max()
                 for i, v in enumerate(counts.values):
-                    plt.text(v + maxv*0.01, i, str(v), va="center", fontsize=9)
+                    plt.text(v + maxv*0.01, i, str(v), va="center", fontsize=10)
                 plt.tight_layout()
-                plt.savefig(os.path.join("charts", f"{fname}_barh.png"), dpi=200, bbox_inches="tight")
+                plt.savefig(os.path.join("charts", f"{fname}_barh.png"), dpi=300, bbox_inches="tight")
                 plt.close()
 
 print("✅ Concluído: gráficos em 'charts/', nuvens de palavras em 'wordclouds/' e legendas em 'legends/'.")
